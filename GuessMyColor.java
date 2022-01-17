@@ -1,21 +1,18 @@
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.*;
-
+import java.awt.*;
+import java.awt.event.*;
 
 public class GuessMyColor extends JFrame {
 
-
-    private static JLabel check; //actual colour
+    private static JLabel check; //actual
     private static int R;
     private static int G;
     private static int B;
 
-    private static JLabel guess; //values for user guess
-    private static int guessR;
-    private static int guessG;
-    private static int guessB;
+    private static JLabel guess; //vars for user guess
+    private static int guessR = 0;
+    private static int guessG = 0;
+    private static int guessB = 0;
 
 
     GuessMyColor() {
@@ -25,6 +22,7 @@ public class GuessMyColor extends JFrame {
         setBounds((int) (0.5 * (screenSize.width - getWidth())), (int) (0.5 * (screenSize.height - getHeight())), getWidth(), getHeight());
 
         initGUI();
+        makeColors();
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //setResizable(false);
@@ -33,64 +31,94 @@ public class GuessMyColor extends JFrame {
     }
 
     private void initGUI() {
-        getContentPane().setLayout(new BorderLayout());
+        JPanel title = new JPanel();
+        JLabel gTitle = new JLabel("Guess My Color", SwingConstants.CENTER);
+        gTitle.setFont(new Font("Times New Roman", Font.PLAIN, 50));
+        gTitle.setOpaque(true);
+        gTitle.setForeground(Color.WHITE);
+        gTitle.setBackground(Color.BLACK);
+        gTitle.setPreferredSize(new Dimension(600, 125));
 
-        JPanel colors = new JPanel(); // both colours that appear
+        JPanel colors = new JPanel();
         guess = new JLabel();
         guess.setOpaque(true);
         guess.setBackground(Color.BLACK);
-        guess.setPreferredSize(new Dimension(50, 50));
+        guess.setPreferredSize(new Dimension(80, 80));
 
         check = new JLabel();
-        check.setOpaque(true);
         check.setBackground(Color.GRAY);
-        check.setPreferredSize(new Dimension(50, 50));
+        check.setOpaque(true);
+        check.setPreferredSize(new Dimension(80, 80));
 
         colors.add(guess);
         colors.add(check);
-        getContentPane().add(colors, BorderLayout.CENTER);
+        title.add(gTitle);
+        getContentPane().add(colors, BorderLayout.NORTH);
+        getContentPane().add(title, BorderLayout.CENTER);
 
-        JPanel buttons = new JPanel();
-        for (Color c : new Color[]{Color.RED, Color.GREEN, Color.BLUE}) {
-            for (JButton b : makeButtons(c)) {
-                buttons.add(b);
+        JPanel buttonPanel = new JPanel();
+        for (Color c: new Color[]{Color.RED, Color.GREEN, Color.BLUE}) {
+            for (JButton b: createButtons(c)) {
+                b.setPreferredSize(new Dimension(80, 80));
+                buttonPanel.add(b);
             }
         }
-        getContentPane().add(buttons, BorderLayout.SOUTH);
+
+        getContentPane().add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private static JButton[] makeButtons(Color c) {
+    private static JButton[] createButtons(Color c) {
         JButton add = new JButton("+");
-        JButton dec = new JButton("-");
-
+        JButton min = new JButton("-");
+        add.setFont(new Font("Times New Roman", Font.PLAIN, 50));
+        min.setFont(new Font("Times New Roman", Font.PLAIN, 50));
         add.setBackground(c);
-        dec.setBackground(c);
+        min.setBackground(c);
 
-        add.addActionListener((ActionEvent a) -> {
+        add.addActionListener((ActionEvent e) -> {
             if (c == Color.RED && guessR != 255) {
                 guessR += 30;
-            } else if (c == Color.GREEN && guessG != 255) {
+            }
+            else if (c == Color.GREEN && guessG != 255) {
                 guessG += 30;
-            } else if (c == Color.BLUE && guessB != 255) {
+            }
+            else if (c == Color.BLUE && guessB != 255) {
                 guessB += 30;
             }
-
+            printStats();
         });
-
-        dec.addActionListener((ActionEvent a) -> {
-            if (c == Color.RED && guessR != 255) {
+        min.addActionListener((ActionEvent e) -> {
+            if (c == Color.RED && guessR != 0) {
                 guessR -= 30;
-            } else if (c == Color.GREEN && guessG != 255) {
+            }
+            else if (c == Color.GREEN && guessG != 0) {
                 guessG -= 30;
-            } else if (c == Color.BLUE && guessB != 255) {
+            }
+            else if (c == Color.BLUE && guessB != 0) {
                 guessB -= 30;
             }
-
+            printStats();
         });
-
-        return new JButton[] {add, dec};
+        return new JButton[]{add, min};
     }
 
+    private static void makeColors() {
+        R = (int) (Math.random() * (255 / 30)) * 30;
+        G = (int) (Math.random() * (255 / 30)) * 30;
+        B = (int) (Math.random() * (255 / 30)) * 30;
+        check.setBackground(new Color(R, G, B));
+        System.out.printf("(%d, %d, %d)\n", R, G, B);
+    }
+
+    private static void printStats() {
+        guess.setBackground(new Color(guessR, guessG, guessB));
+        System.out.printf("Answer: (%d, %d, %d)\n", R, G, B); //answers
+        System.out.printf("Current Guess: (%d, %d, %d)\n", guessR, guessG, guessB);
+        if (R == guessR && G == guessG && B == guessB) {
+            JOptionPane.showConfirmDialog(null, String.format("Congrats you guessed it. RGB: (%d, %d, %d)", R, G, B), "Congrats!", JOptionPane.OK_CANCEL_OPTION);
+            System.exit(0);
+        }
+    }
 
     public static void main(String[] args) {
         new GuessMyColor();
